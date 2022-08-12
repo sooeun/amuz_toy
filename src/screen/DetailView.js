@@ -10,6 +10,7 @@ import Description from "../components/Description";
 import axios from "axios";
 import AvatarGroupWithAction from "../components/AvatarGroupsWithAction";
 import { atomIsLoaded, atomCommentList, atomPostList, atomNeedUpdate } from "../data/atoms";
+import {createComment, getCommentList, getPost} from "../data/models";
 
 const LinkArrow = styled(Link)`
     position: absolute;
@@ -118,7 +119,15 @@ const DetailView = () => {
         axios
             .get(`https://jsonplaceholder.typicode.com/comments?postId=${itemId}`)
             .then((res) => {
-                setCommentList(res.data);
+                for (let comment of res.data) {
+                    createComment(comment);
+                }
+
+                // post -> comments
+                const post = getPost(Number(itemId));
+                const commentList = post.comments.toModelArray();
+
+                setCommentList(commentList);
             })
             .catch((err) => {
                 console.log("##fetchComments err", err);
@@ -140,10 +149,10 @@ const DetailView = () => {
 
     useLayoutEffect(() => {
         if (currentPostList) {
-            if (post.postId === 0) {
+            if (post.postNum === 0) {
                 setPrevPost({ empty: true });
                 setNextPost(setNewPost(itemIdx + 1));
-            } else if (post.postId === currentPostList.length - 1) {
+            } else if (post.postNum === currentPostList.length - 1) {
                 setPrevPost(setNewPost(itemIdx - 1));
                 setNextPost({ empty: true });
             } else {

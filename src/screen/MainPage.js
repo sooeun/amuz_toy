@@ -9,6 +9,7 @@ import { atom, useRecoilState } from "recoil";
 import Header from "../components/Header";
 import GridList from "../components/GridList";
 import { atomUserList, atomPostList, atomNeedUpdate } from "../data/atoms";
+import {createPost, createUser, getPost, getUser} from "../data/models";
 
 const ListItemsContainer = styled.ul`
     padding: 0;
@@ -35,7 +36,8 @@ const MainPage = () => {
                     if (item.userId === userId.id) {
                         newArr.push({
                             id: item.id,
-                            postId: i,
+                            postNum: i,
+                            userId : item.userId,
                             title: item.title,
                             completed: item.completed,
                         });
@@ -44,8 +46,24 @@ const MainPage = () => {
                 });
                 return newArr;
             });
-            setUsers(userList);
+            // redux orm test
+
+            for(let user of userList) {
+                createUser(user);
+            };
+
+            for(let post of postList) {
+                for(let one of post) {
+                    createPost(one);
+                }
+            }
+
+            setUsers(getUser());
             setPosts(postList);
+
+            console.log("recoil : ",postList);
+            console.log("orm  :",getPost());
+
             sessionStorage.setItem("postList", JSON.stringify(postList));
 
             setIsLoaded(false);
